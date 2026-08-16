@@ -1,5 +1,5 @@
 /**
- * no-spin — LLM repetition (spinning) detection extension
+ * pi-no-spin — LLM repetition (spinning) detection extension
  *
  * Monitors the assistant's streaming output and detects when it repeatedly
  * outputs the same string segment over and over (by default: the same segment
@@ -12,7 +12,7 @@
  *
  * Motivation: open-source models (DeepSeek, Qwen, Llama, …) occasionally fall
  * into output loops where they repeat the same string continuously, burning
- * tokens without making progress. no-spin cuts these off early.
+ * tokens without making progress. pi-no-spin cuts these off early.
  *
  * Usage:
  *   /nospin                Show status and configuration
@@ -140,7 +140,7 @@ export function extractAssistantText(message: unknown): string {
   return parts.join("");
 }
 
-const CONFIG_ENTRY = "nospin-config";
+const CONFIG_ENTRY = "pinospin-config";
 
 export default function (pi: ExtensionAPI) {
   let cfg: NoSpinConfig = { ...DEFAULT_CONFIG };
@@ -170,7 +170,7 @@ export default function (pi: ExtensionAPI) {
     const preview = det.unit.trim().replace(/\s+/g, " ").slice(0, 60);
     try {
       ctx.ui.notify(
-        `🚫 no-spin: spinning detected! Repeated "${preview}…" ${det.repeatCount} times. ` +
+        `🚫 pi-no-spin: spinning detected! Repeated "${preview}…" ${det.repeatCount} times. ` +
           "Generation interrupted, reminder sent.",
         "warning",
       );
@@ -189,7 +189,7 @@ export default function (pi: ExtensionAPI) {
     // deliverAs "followUp" is safe: it is delivered once the aborted run ends,
     // then triggers a fresh turn.
     const reminder =
-      `[no-spin] You are stuck spinning: you have output the same string ` +
+      `[pi-no-spin] You are stuck spinning: you have output the same string ` +
       `${det.repeatCount} consecutive times (segment length ${det.period} chars). ` +
       `Your generation was interrupted.\n` +
       `Please immediately stop producing identical content, re-assess the current task, ` +
@@ -251,7 +251,7 @@ export default function (pi: ExtensionAPI) {
     handler: async (args, ctx) => {
       const parts = args.trim().split(/\s+/).filter(Boolean);
       const status = () =>
-        `no-spin: ${cfg.enabled ? "🟢 enabled" : "⚪ disabled"} | threshold=${cfg.threshold} | ` +
+        `pi-no-spin: ${cfg.enabled ? "🟢 enabled" : "⚪ disabled"} | threshold=${cfg.threshold} | ` +
         `minUnit=${cfg.minUnit} | maxUnit=${cfg.maxUnit} | cooldown=${cfg.cooldownMs}ms` +
         (lastDetect ? ` | last: "${lastDetect.unit.trim().slice(0, 40)}…" x${lastDetect.repeatCount}` : "");
 
@@ -265,12 +265,12 @@ export default function (pi: ExtensionAPI) {
         case "on":
           cfg.enabled = true;
           persist();
-          ctx.ui.notify("no-spin: enabled", "success");
+          ctx.ui.notify("pi-no-spin: enabled", "success");
           break;
         case "off":
           cfg.enabled = false;
           persist();
-          ctx.ui.notify("no-spin: disabled", "info");
+          ctx.ui.notify("pi-no-spin: disabled", "info");
           break;
         case "threshold": {
           const n = Number(value);

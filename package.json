@@ -1,5 +1,5 @@
 {
-  "name": "no-spin",
+  "name": "pi-no-spin",
   "version": "1.0.0",
   "description": "pi extension that detects when the LLM spins (repeats the same string over and over), interrupts generation, and reminds it to stop",
   "keywords": [
@@ -16,10 +16,10 @@
   "author": "wilhg",
   "repository": {
     "type": "git",
-    "url": "git@github.com:wilhg/no-spin.git"
+    "url": "git@github.com:wilhg/pi-no-spin.git"
   },
   "scripts": {
-    "test": "node tests/no-spin.test.mts"
+    "test": "node tests/pi-no-spin.test.mts"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*"

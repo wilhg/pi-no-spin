@@ -1,8 +1,8 @@
-# no-spin
+# pi-no-spin
 
 A [pi](https://pi.dev) extension that detects when the LLM **spins** — repeating the same string over and over — **interrupts the generation**, and **reminds the model to stop** — so you don't burn tokens while the model churns out the same segment on repeat.
 
-> **Why it exists:** open-source / self-hosted models (DeepSeek, Qwen, Llama, GLM, …) have a non-negligible chance of falling into **output loops** — repeating the same sentence, code block, or token sequence continuously without making progress (`deepseek-reasoner` and quantized local models are especially prone). no-spin cuts these off in real time.
+> **Why it exists:** open-source / self-hosted models (DeepSeek, Qwen, Llama, GLM, …) have a non-negligible chance of falling into **output loops** — repeating the same sentence, code block, or token sequence continuously without making progress (`deepseek-reasoner` and quantized local models are especially prone). pi-no-spin cuts these off in real time.
 
 ## How it works
 
@@ -15,13 +15,13 @@ A [pi](https://pi.dev) extension that detects when the LLM **spins** — repeati
 ## Install
 
 ```bash
-pi install git:github.com/wilhg/no-spin
+pi install git:github.com/wilhg/pi-no-spin
 ```
 
 or with SSH shorthand:
 
 ```bash
-pi install git:git@github.com:wilhg/no-spin.git
+pi install git:git@github.com:wilhg/pi-no-spin.git
 ```
 
 Then reload in a running pi session:
@@ -33,7 +33,7 @@ Then reload in a running pi session:
 ### Try without installing
 
 ```bash
-pi -e git:github.com/wilhg/no-spin
+pi -e git:github.com/wilhg/pi-no-spin
 ```
 
 ## Usage
@@ -51,7 +51,7 @@ Detection is **on by default**. Configure it with the `/nospin` command:
 Examples:
 
 ```
-/nospin                    →  no-spin: 🟢 enabled | threshold=10 | minUnit=4 | maxUnit=300 | cooldown=10000ms
+/nospin                    →  pi-no-spin: 🟢 enabled | threshold=10 | minUnit=4 | maxUnit=300 | cooldown=10000ms
 /nospin threshold 15       →  require 15 consecutive repeats
 /nospin max 500            →  detect segments up to 500 chars
 /nospin off                →  disable
@@ -86,7 +86,7 @@ You should see it interrupted around the 10th repetition — a ⛔ notification 
 ## Development
 
 ```bash
-npm test     # runs tests/no-spin.test.mts (Node 22.6+ / 23+, type stripping)
+npm test     # runs tests/pi-no-spin.test.mts (Node 22.6+ / 23+, type stripping)
 ```
 
 `npm test` does not require pi or a model — the detection algorithm is pure and unit-tested.
