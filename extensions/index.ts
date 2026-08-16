@@ -1,25 +1,25 @@
 /**
- * loop-guard — LLM loop detection extension
+ * no-spin — LLM repetition (spinning) detection extension
  *
  * Monitors the assistant's streaming output and detects when it repeatedly
  * outputs the same string segment over and over (by default: the same segment
  * 10+ consecutive times, with a segment length of 4–300 characters).
  *
- * When a loop is detected the extension:
+ * When spinning is detected the extension:
  *   1. Interrupts the current generation immediately (ctx.abort())
  *   2. Injects a reminder message into the conversation telling the LLM it is
- *      stuck in a loop and should stop repeating and reassess.
+ *      stuck repeating itself and should stop and reassess.
  *
  * Motivation: open-source models (DeepSeek, Qwen, Llama, …) occasionally fall
  * into output loops where they repeat the same string continuously, burning
- * tokens without making progress. loop-guard cuts these loops off early.
+ * tokens without making progress. no-spin cuts these off early.
  *
  * Usage:
- *   /loopguard                Show status and configuration
- *   /loopguard on|off         Enable / disable detection
- *   /loopguard threshold N    Set the repeat-count threshold (default 10)
- *   /loopguard min N          Set the minimum segment length (default 4)
- *   /loopguard max N          Set the maximum segment length (default 300)
+ *   /nospin                Show status and configuration
+ *   /nospin on|off         Enable / disable detection
+ *   /nospin threshold N    Set the repeat-count threshold (default 10)
+ *   /nospin min N          Set the minimum segment length (default 4)
+ *   /nospin max N          Set the maximum segment length (default 300)
  *
  * Configuration is persisted to the session file via pi.appendEntry() and is
  * restored automatically on the next session_start.
@@ -28,7 +28,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 /** Detection configuration */
-export interface LoopGuardConfig {
+export interface NoSpinConfig {
   /** Whether detection is enabled */
   enabled: boolean;
   /** How many consecutive repetitions of the same segment count as a loop */
@@ -41,7 +41,7 @@ export interface LoopGuardConfig {
   cooldownMs: number;
 }
 
-export const DEFAULT_CONFIG: LoopGuardConfig = {
+export const DEFAULT_CONFIG: NoSpinConfig = {
   enabled: true,
   threshold: 10,
   minUnit: 4,
@@ -73,7 +73,7 @@ export interface LoopDetection {
  */
 export function detectRepeatedTail(
   text: string,
-  cfg: Pick<LoopGuardConfig, "threshold" | "minUnit" | "maxUnit">,
+  cfg: Pick<NoSpinConfig, "threshold" | "minUnit" | "maxUnit">,
 ): LoopDetection | null {
   const { threshold, minUnit, maxUnit } = cfg;
   if (text.length < minUnit * threshold) return null;
@@ -140,10 +140,10 @@ export function extractAssistantText(message: unknown): string {
   return parts.join("");
 }
 
-const CONFIG_ENTRY = "loopguard-config";
+const CONFIG_ENTRY = "nospin-config";
 
 export default function (pi: ExtensionAPI) {
-  let cfg: LoopGuardConfig = { ...DEFAULT_CONFIG };
+  let cfg: NoSpinConfig = { ...DEFAULT_CONFIG };
 
   // Session-scoped state
   let currentText = ""; // accumulated text of the current assistant message
@@ -157,7 +157,7 @@ export default function (pi: ExtensionAPI) {
     lastDetect = null;
     for (const entry of ctx.sessionManager.getEntries()) {
       if (entry.type === "custom" && entry.customType === CONFIG_ENTRY) {
-        const data = entry.data as Partial<LoopGuardConfig>;
+        const data = entry.data as Partial<NoSpinConfig>;
         cfg = { ...DEFAULT_CONFIG, ...data };
       }
     }
@@ -170,7 +170,7 @@ export default function (pi: ExtensionAPI) {
     const preview = det.unit.trim().replace(/\s+/g, " ").slice(0, 60);
     try {
       ctx.ui.notify(
-        `⛔ loop-guard: loop detected! Repeated "${preview}…" ${det.repeatCount} times. ` +
+        `🚫 no-spin: spinning detected! Repeated "${preview}…" ${det.repeatCount} times. ` +
           "Generation interrupted, reminder sent.",
         "warning",
       );
@@ -189,7 +189,7 @@ export default function (pi: ExtensionAPI) {
     // deliverAs "followUp" is safe: it is delivered once the aborted run ends,
     // then triggers a fresh turn.
     const reminder =
-      `[loop-guard] You are stuck in a repetition loop: you have output the same string ` +
+      `[no-spin] You are stuck spinning: you have output the same string ` +
       `${det.repeatCount} consecutive times (segment length ${det.period} chars). ` +
       `Your generation was interrupted.\n` +
       `Please immediately stop producing identical content, re-assess the current task, ` +
@@ -244,14 +244,14 @@ export default function (pi: ExtensionAPI) {
     pi.appendEntry(CONFIG_ENTRY, { ...cfg });
   }
 
-  // /loopguard command: view status / toggle / tune parameters
-  pi.registerCommand("loopguard", {
+  // /nospin command: view status / toggle / tune parameters
+  pi.registerCommand("nospin", {
     description:
-      "Loop detection: view status or configure (on|off|threshold|min|max). e.g. /loopguard threshold 15",
+      "Repetition (spinning) detection: view status or configure (on|off|threshold|min|max). e.g. /nospin threshold 15",
     handler: async (args, ctx) => {
       const parts = args.trim().split(/\s+/).filter(Boolean);
       const status = () =>
-        `loop-guard: ${cfg.enabled ? "🟢 enabled" : "⚪ disabled"} | threshold=${cfg.threshold} | ` +
+        `no-spin: ${cfg.enabled ? "🟢 enabled" : "⚪ disabled"} | threshold=${cfg.threshold} | ` +
         `minUnit=${cfg.minUnit} | maxUnit=${cfg.maxUnit} | cooldown=${cfg.cooldownMs}ms` +
         (lastDetect ? ` | last: "${lastDetect.unit.trim().slice(0, 40)}…" x${lastDetect.repeatCount}` : "");
 
@@ -265,17 +265,17 @@ export default function (pi: ExtensionAPI) {
         case "on":
           cfg.enabled = true;
           persist();
-          ctx.ui.notify("loop-guard: enabled", "success");
+          ctx.ui.notify("no-spin: enabled", "success");
           break;
         case "off":
           cfg.enabled = false;
           persist();
-          ctx.ui.notify("loop-guard: disabled", "info");
+          ctx.ui.notify("no-spin: disabled", "info");
           break;
         case "threshold": {
           const n = Number(value);
           if (!Number.isInteger(n) || n < 2) {
-            ctx.ui.notify("Usage: /loopguard threshold <integer>=2", "warning");
+            ctx.ui.notify("Usage: /nospin threshold <integer>=2", "warning");
             return;
           }
           cfg.threshold = n;
@@ -287,7 +287,7 @@ export default function (pi: ExtensionAPI) {
         case "max": {
           const n = Number(value);
           if (!Number.isInteger(n) || n < 1) {
-            ctx.ui.notify(`Usage: /loopguard ${key} <integer>=1`, "warning");
+            ctx.ui.notify(`Usage: /nospin ${key} <integer>=1`, "warning");
             return;
           }
           if (key === "min") {

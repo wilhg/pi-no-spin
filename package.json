@@ -1,11 +1,12 @@
 {
-  "name": "loop-guard",
+  "name": "no-spin",
   "version": "1.0.0",
-  "description": "pi extension that detects when the LLM repeats the same string in a loop, interrupts generation, and reminds it to stop",
+  "description": "pi extension that detects when the LLM spins (repeats the same string over and over), interrupts generation, and reminds it to stop",
   "keywords": [
     "pi-package",
     "pi-extension",
     "loop",
+    "spinning",
     "repetition",
     "guardrail",
     "deepseek"
@@ -15,10 +16,10 @@
   "author": "wilhg",
   "repository": {
     "type": "git",
-    "url": "git@github.com:wilhg/loop-guard.git"
+    "url": "git@github.com:wilhg/no-spin.git"
   },
   "scripts": {
-    "test": "node tests/loop-guard.test.mts"
+    "test": "node tests/no-spin.test.mts"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*"

@@ -1,8 +1,8 @@
-# loop-guard
+# no-spin
 
-A [pi](https://pi.dev) extension that detects when the LLM repeats the same string in a loop, **interrupts the generation**, and **reminds the model to stop** — so you don't burn tokens while the model churns out the same segment over and over.
+A [pi](https://pi.dev) extension that detects when the LLM **spins** — repeating the same string over and over — **interrupts the generation**, and **reminds the model to stop** — so you don't burn tokens while the model churns out the same segment on repeat.
 
-> **Why it exists:** open-source / self-hosted models (DeepSeek, Qwen, Llama, GLM, …) have a non-negligible chance of falling into **output loops** — repeating the same sentence, code block, or token sequence continuously without making progress (`deepseek-reasoner` and quantized local models are especially prone). loop-guard cuts these loops off in real time.
+> **Why it exists:** open-source / self-hosted models (DeepSeek, Qwen, Llama, GLM, …) have a non-negligible chance of falling into **output loops** — repeating the same sentence, code block, or token sequence continuously without making progress (`deepseek-reasoner` and quantized local models are especially prone). no-spin cuts these off in real time.
 
 ## How it works
 
@@ -15,13 +15,13 @@ A [pi](https://pi.dev) extension that detects when the LLM repeats the same stri
 ## Install
 
 ```bash
-pi install git:github.com/wilhg/loop-guard
+pi install git:github.com/wilhg/no-spin
 ```
 
 or with SSH shorthand:
 
 ```bash
-pi install git:git@github.com:wilhg/loop-guard.git
+pi install git:git@github.com:wilhg/no-spin.git
 ```
 
 Then reload in a running pi session:
@@ -33,28 +33,28 @@ Then reload in a running pi session:
 ### Try without installing
 
 ```bash
-pi -e git:github.com/wilhg/loop-guard
+pi -e git:github.com/wilhg/no-spin
 ```
 
 ## Usage
 
-Detection is **on by default**. Configure it with the `/loopguard` command:
+Detection is **on by default**. Configure it with the `/nospin` command:
 
 ```
-/loopguard                Show status and current configuration
-/loopguard on|off         Enable / disable detection
-/loopguard threshold N    Reps of the same segment that count as a loop (default 10)
-/loopguard min N          Minimum segment length to consider (default 4)
-/loopguard max N          Maximum segment length to consider (default 300)
+/nospin                Show status and current configuration
+/nospin on|off         Enable / disable detection
+/nospin threshold N    Reps of the same segment that count as a loop (default 10)
+/nospin min N          Minimum segment length to consider (default 4)
+/nospin max N          Maximum segment length to consider (default 300)
 ```
 
 Examples:
 
 ```
-/loopguard                    →  loop-guard: 🟢 enabled | threshold=10 | minUnit=4 | maxUnit=300 | cooldown=10000ms
-/loopguard threshold 15       →  require 15 consecutive repeats
-/loopguard max 500            →  detect segments up to 500 chars
-/loopguard off                →  disable
+/nospin                    →  no-spin: 🟢 enabled | threshold=10 | minUnit=4 | maxUnit=300 | cooldown=10000ms
+/nospin threshold 15       →  require 15 consecutive repeats
+/nospin max 500            →  detect segments up to 500 chars
+/nospin off                →  disable
 ```
 
 Configuration is persisted per-session (`pi.appendEntry`) and restored automatically on the next `session_start`.
@@ -86,7 +86,7 @@ You should see it interrupted around the 10th repetition — a ⛔ notification 
 ## Development
 
 ```bash
-npm test     # runs tests/loop-guard.test.mts (Node 22.6+ / 23+, type stripping)
+npm test     # runs tests/no-spin.test.mts (Node 22.6+ / 23+, type stripping)
 ```
 
 `npm test` does not require pi or a model — the detection algorithm is pure and unit-tested.
