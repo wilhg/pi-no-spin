@@ -3,7 +3,7 @@
  *
  * Monitors the assistant's streaming output and detects when it repeatedly
  * outputs the same string segment over and over (by default: the same segment
- * 10+ consecutive times, with a segment length of 4–300 characters).
+ * 6+ consecutive times, with a segment length of 4–300 characters).
  *
  * When spinning is detected the extension:
  *   1. Interrupts the current generation immediately (ctx.abort())
@@ -17,7 +17,7 @@
  * Usage:
  *   /nospin                Show status and configuration
  *   /nospin on|off         Enable / disable detection
- *   /nospin threshold N    Set the repeat-count threshold (default 10)
+ *   /nospin threshold N    Set the repeat-count threshold (default 6)
  *   /nospin min N          Set the minimum segment length (default 4)
  *   /nospin max N          Set the maximum segment length (default 300)
  *
@@ -43,7 +43,7 @@ export interface NoSpinConfig {
 
 export const DEFAULT_CONFIG: NoSpinConfig = {
   enabled: true,
-  threshold: 10,
+  threshold: 6,
   minUnit: 4,
   maxUnit: 300,
   cooldownMs: 10_000,

@@ -1,10 +1,12 @@
 {
   "name": "pi-no-spin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "pi extension that detects when the LLM spins (repeats the same string over and over), interrupts generation, and reminds it to stop",
   "keywords": [
     "pi-package",
     "pi-extension",
+    "pi",
+    "coding-agent",
     "loop",
     "spinning",
     "repetition",
@@ -21,6 +23,11 @@
   "scripts": {
     "test": "node tests/pi-no-spin.test.mts"
   },
+  "files": [
+    "extensions",
+    "README.md",
+    "LICENSE"
+  ],
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*"
   },

@@ -43,7 +43,7 @@ Detection is **on by default**. Configure it with the `/nospin` command:
 ```
 /nospin                Show status and current configuration
 /nospin on|off         Enable / disable detection
-/nospin threshold N    Reps of the same segment that count as a loop (default 10)
+/nospin threshold N    Reps of the same segment that count as a loop (default 6)
 /nospin min N          Minimum segment length to consider (default 4)
 /nospin max N          Maximum segment length to consider (default 300)
 ```
@@ -51,7 +51,7 @@ Detection is **on by default**. Configure it with the `/nospin` command:
 Examples:
 
 ```
-/nospin                    →  pi-no-spin: 🟢 enabled | threshold=10 | minUnit=4 | maxUnit=300 | cooldown=10000ms
+/nospin                    →  pi-no-spin: 🟢 enabled | threshold=6 | minUnit=4 | maxUnit=300 | cooldown=10000ms
 /nospin threshold 15       →  require 15 consecutive repeats
 /nospin max 500            →  detect segments up to 500 chars
 /nospin off                →  disable
@@ -65,13 +65,13 @@ Tell the model something like:
 
 > Please repeat the same sentence 20 times in a row.
 
-You should see it interrupted around the 10th repetition — a ⛔ notification appears and the model receives a reminder to stop repeating.
+You should see it interrupted around the 6th repetition — a ⛔ notification appears and the model receives a reminder to stop repeating.
 
 ## Options & defaults
 
 | Option            | Default | Meaning                              |
 | ----------------- | ------- | ------------------------------------ |
-| `threshold`       | 10      | Consecutive reps that count as a loop |
+| `threshold`       | 6       | Consecutive reps that count as a loop |
 | `minUnit`         | 4       | Minimum segment length (chars)       |
 | `maxUnit`         | 300     | Maximum segment length (chars)       |
 | `cooldownMs`      | 10000   | Cooldown between triggers (ms)       |
@@ -79,7 +79,7 @@ You should see it interrupted around the 10th repetition — a ⛔ notification 
 
 ## Known limitations
 
-- **Non-streaming whole-message arrival:** if an entire response arrives at once (non-streaming provider) *and* the tail of that message happens to contain a few non-repeating closing characters, the tail-anchored periodic window can miss the run. In practice this never matters: with streaming, detection fires at the exact moment the 10th repetition completes — before the model gets a chance to emit any closing text.
+- **Non-streaming whole-message arrival:** if an entire response arrives at once (non-streaming provider) *and* the tail of that message happens to contain a few non-repeating closing characters, the tail-anchored periodic window can miss the run. In practice this never matters: with streaming, detection fires at the exact moment the 6th repetition completes — before the model gets a chance to emit any closing text.
 - **Exact periodicity:** the check requires characters at distance `period` to be *exactly* equal. A model that repeats a segment with slight mutations each time will not trigger (returning the same string byte-for-byte is the common failure mode this targets).
 - **Tool-call loops:** repeated identical tool calls are a different loop signature and are not covered (yet).
 

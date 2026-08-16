@@ -19,6 +19,29 @@ function check(name: string, text: string, expect: boolean) {
 
 // User scenario: the same sentence repeated 12 times
 const unit = "Please immediately stop repeating this exact sentence.";
+
+// --- Default config regression: threshold must be 6 now ---
+function checkDefault(name: string, cfg: unknown, expected: number) {
+  const ok = (cfg as { threshold: number }).threshold === expected;
+  console.log(`${ok ? "PASS" : "FAIL"}  ${name}  -> threshold=${(cfg as { threshold: number }).threshold}`);
+  if (!ok) process.exitCode = 1;
+}
+checkDefault("DEFAULT_CONFIG.threshold === 6", DEFAULT_CONFIG, 6);
+
+// The new default (threshold 6) must detect 6 reps but not 5
+const cfg6 = { threshold: 6, minUnit: 4, maxUnit: 300 };
+{
+  const d6 = detectRepeatedTail(unit.repeat(6), cfg6);
+  const ok = !!d6 && d6.repeatCount === 6;
+  console.log(`${ok ? "PASS" : "FAIL"}  6 reps at default threshold  -> ` + (d6 ? `count=${d6.repeatCount}` : "none"));
+  if (!ok) process.exitCode = 1;
+}
+{
+  const d5 = detectRepeatedTail(unit.repeat(5), cfg6);
+  const ok = !d5;
+  console.log(`${ok ? "PASS" : "FAIL"}  5 reps at default threshold (should NOT fire)`);
+  if (!ok) process.exitCode = 1;
+}
 check("12x repeated Chinese-length sentence", unit.repeat(12), true);
 
 // 300-char segment repeated exactly 10 times
