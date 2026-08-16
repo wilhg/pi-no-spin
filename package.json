@@ -1,0 +1,31 @@
+{
+  "name": "loop-guard",
+  "version": "1.0.0",
+  "description": "pi extension that detects when the LLM repeats the same string in a loop, interrupts generation, and reminds it to stop",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "loop",
+    "repetition",
+    "guardrail",
+    "deepseek"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "author": "wilhg",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:wilhg/loop-guard.git"
+  },
+  "scripts": {
+    "test": "node tests/loop-guard.test.mts"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "pi": {
+    "extensions": [
+      "./extensions"
+    ]
+  }
+}
