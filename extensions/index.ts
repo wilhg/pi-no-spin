@@ -3,7 +3,7 @@
  *
  * Monitors the assistant's streaming output and detects when it repeatedly
  * outputs the same string segment over and over (by default: the same segment
- * 6+ consecutive times, with a segment length of 4–300 characters).
+ * 7+ consecutive times, with a segment length of 4–300 characters).
  *
  * When spinning is detected the extension:
  *   1. Interrupts the current generation immediately (ctx.abort())
@@ -17,7 +17,7 @@
  * Usage:
  *   /nospin                Show status and configuration
  *   /nospin on|off         Enable / disable detection
- *   /nospin threshold N    Set the repeat-count threshold (default 6)
+ *   /nospin threshold N    Set the repeat-count threshold (default 7)
  *   /nospin min N          Set the minimum segment length (default 4)
  *   /nospin max N          Set the maximum segment length (default 300)
  *
@@ -43,7 +43,7 @@ export interface NoSpinConfig {
 
 export const DEFAULT_CONFIG: NoSpinConfig = {
   enabled: true,
-  threshold: 6,
+  threshold: 7,
   minUnit: 4,
   maxUnit: 300,
   cooldownMs: 10_000,
@@ -59,6 +59,21 @@ export interface LoopDetection {
   repeatCount: number;
   /** Character offset in the full text where the repeating tail begins */
   matchedFrom: number;
+}
+
+/**
+ * Characters treated as visual separators instead of loop content: repeating
+ * only these characters (e.g. a ─ divider line or a dot leader) is
+ * formatting, not spinning.
+ */
+const SEPARATOR_CHARS = new Set(["─", "."]);
+
+/** Returns true when `unit` consists exclusively of separator characters. */
+function isSeparatorOnly(unit: string): boolean {
+  for (const ch of unit) {
+    if (!SEPARATOR_CHARS.has(ch)) return false;
+  }
+  return true;
 }
 
 /**
@@ -91,6 +106,10 @@ export function detectRepeatedTail(
     // Repetition of pure whitespace/newlines is most likely indentation or
     // formatting, not a loop.
     if (!/\S/.test(unit)) continue;
+
+    // Repetition of only separator characters (─, .) is a visual divider
+    // (line draws, dot leaders, ellipsis rows), not a loop.
+    if (isSeparatorOnly(unit)) continue;
 
     // p-periodicity check: for the last `need` characters, verify
     // tail[i] === tail[i + p] for every i in range.

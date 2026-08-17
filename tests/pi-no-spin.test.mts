@@ -20,28 +20,34 @@ function check(name: string, text: string, expect: boolean) {
 // User scenario: the same sentence repeated 12 times
 const unit = "Please immediately stop repeating this exact sentence.";
 
-// --- Default config regression: threshold must be 6 now ---
+// --- Default config regression: threshold must be 7 now ---
 function checkDefault(name: string, cfg: unknown, expected: number) {
   const ok = (cfg as { threshold: number }).threshold === expected;
   console.log(`${ok ? "PASS" : "FAIL"}  ${name}  -> threshold=${(cfg as { threshold: number }).threshold}`);
   if (!ok) process.exitCode = 1;
 }
-checkDefault("DEFAULT_CONFIG.threshold === 6", DEFAULT_CONFIG, 6);
+checkDefault("DEFAULT_CONFIG.threshold === 7", DEFAULT_CONFIG, 7);
 
-// The new default (threshold 6) must detect 6 reps but not 5
-const cfg6 = { threshold: 6, minUnit: 4, maxUnit: 300 };
+// The default (threshold 7) must detect 7 reps but not 6
+const cfg7 = { threshold: 7, minUnit: 4, maxUnit: 300 };
 {
-  const d6 = detectRepeatedTail(unit.repeat(6), cfg6);
-  const ok = !!d6 && d6.repeatCount === 6;
-  console.log(`${ok ? "PASS" : "FAIL"}  6 reps at default threshold  -> ` + (d6 ? `count=${d6.repeatCount}` : "none"));
+  const d7 = detectRepeatedTail(unit.repeat(7), cfg7);
+  const ok = !!d7 && d7.repeatCount === 7;
+  console.log(`${ok ? "PASS" : "FAIL"}  7 reps at default threshold  -> ` + (d7 ? `count=${d7.repeatCount}` : "none"));
   if (!ok) process.exitCode = 1;
 }
 {
-  const d5 = detectRepeatedTail(unit.repeat(5), cfg6);
-  const ok = !d5;
-  console.log(`${ok ? "PASS" : "FAIL"}  5 reps at default threshold (should NOT fire)`);
+  const d6 = detectRepeatedTail(unit.repeat(6), cfg7);
+  const ok = !d6;
+  console.log(`${ok ? "PASS" : "FAIL"}  6 reps at default threshold (should NOT fire)`);
   if (!ok) process.exitCode = 1;
 }
+
+// --- Separator characters (─ and .) are exceptions: divider lines, dot leaders ---
+check("Divider line ─ x40 (should NOT fire)", "─".repeat(40), false);
+check("Dot leader . x50 (should NOT fire)", ".".repeat(50), false);
+check("Mixed separator ──. x20 (should NOT fire)", "──.".repeat(20), false);
+check("Bullet prose that repeats still fires", "• item\n".repeat(10), true);
 check("12x repeated Chinese-length sentence", unit.repeat(12), true);
 
 // 300-char segment repeated exactly 10 times

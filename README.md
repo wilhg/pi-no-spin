@@ -10,6 +10,7 @@ A [pi](https://pi.dev) extension that detects when the LLM **spins** — repeati
 2. **Detect** — it accumulates the text and runs a **periodicity check** on the tail: if the last `period × threshold` characters satisfy `text[i] === text[i + period]` for all `i` (a periodic run), a repeated segment of length `period` has been output at least `threshold` times in a row. Period is scanned from `minUnit` (default 4) up to `maxUnit` (default 300) characters.
    - Period detection is used instead of block-aligned matching, so it still fires while the model is mid-way through streaming the next repeat (a partial segment) — no false negatives due to alignment jitter.
    - Pure-whitespace repetition (indentation / blank lines) is not treated as a loop.
+   - Repetition of separators (`─` and `.`) is not treated as a loop either — those are visual dividers / dot leaders, e.g. a long `─────` rule or a `.....` line, not spinning.
 3. **Interrupt** — on detection the extension calls `ctx.abort()` to stop generation immediately, shows a ⛔ notification, then queues a follow-up user message telling the model it is stuck in a loop and should re-assess instead of repeating.
 
 ## Install
@@ -43,7 +44,7 @@ Detection is **on by default**. Configure it with the `/nospin` command:
 ```
 /nospin                Show status and current configuration
 /nospin on|off         Enable / disable detection
-/nospin threshold N    Reps of the same segment that count as a loop (default 6)
+/nospin threshold N    Reps of the same segment that count as a loop (default 7)
 /nospin min N          Minimum segment length to consider (default 4)
 /nospin max N          Maximum segment length to consider (default 300)
 ```
@@ -51,7 +52,7 @@ Detection is **on by default**. Configure it with the `/nospin` command:
 Examples:
 
 ```
-/nospin                    →  pi-no-spin: 🟢 enabled | threshold=6 | minUnit=4 | maxUnit=300 | cooldown=10000ms
+/nospin                    →  pi-no-spin: 🟢 enabled | threshold=7 | minUnit=4 | maxUnit=300 | cooldown=10000ms
 /nospin threshold 15       →  require 15 consecutive repeats
 /nospin max 500            →  detect segments up to 500 chars
 /nospin off                →  disable
@@ -65,13 +66,13 @@ Tell the model something like:
 
 > Please repeat the same sentence 20 times in a row.
 
-You should see it interrupted around the 6th repetition — a ⛔ notification appears and the model receives a reminder to stop repeating.
+You should see it interrupted around the 7th repetition — a ⛔ notification appears and the model receives a reminder to stop repeating.
 
 ## Options & defaults
 
 | Option            | Default | Meaning                              |
 | ----------------- | ------- | ------------------------------------ |
-| `threshold`       | 6       | Consecutive reps that count as a loop |
+| `threshold`       | 7       | Consecutive reps that count as a loop |
 | `minUnit`         | 4       | Minimum segment length (chars)       |
 | `maxUnit`         | 300     | Maximum segment length (chars)       |
 | `cooldownMs`      | 10000   | Cooldown between triggers (ms)       |
@@ -79,7 +80,7 @@ You should see it interrupted around the 6th repetition — a ⛔ notification a
 
 ## Known limitations
 
-- **Non-streaming whole-message arrival:** if an entire response arrives at once (non-streaming provider) *and* the tail of that message happens to contain a few non-repeating closing characters, the tail-anchored periodic window can miss the run. In practice this never matters: with streaming, detection fires at the exact moment the 6th repetition completes — before the model gets a chance to emit any closing text.
+- **Non-streaming whole-message arrival:** if an entire response arrives at once (non-streaming provider) *and* the tail of that message happens to contain a few non-repeating closing characters, the tail-anchored periodic window can miss the run. In practice this never matters: with streaming, detection fires at the exact moment the 7th repetition completes — before the model gets a chance to emit any closing text.
 - **Exact periodicity:** the check requires characters at distance `period` to be *exactly* equal. A model that repeats a segment with slight mutations each time will not trigger (returning the same string byte-for-byte is the common failure mode this targets).
 - **Tool-call loops:** repeated identical tool calls are a different loop signature and are not covered (yet).
 
