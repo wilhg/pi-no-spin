@@ -18,7 +18,7 @@
   "author": "wilhg",
   "repository": {
     "type": "git",
-    "url": "git@github.com:wilhg/pi-no-spin.git"
+    "url": "git+ssh://git@github.com/wilhg/pi-no-spin.git"
   },
   "scripts": {
     "test": "node tests/pi-no-spin.test.mts"
